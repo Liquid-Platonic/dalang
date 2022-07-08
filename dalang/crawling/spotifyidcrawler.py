@@ -1,9 +1,10 @@
 from typing import List, Optional
 
 from dalang.crawling.spotifycrawler import SpotifyCrawler
+from dalang.utils.singleton import Singleton
 
 
-class SpotifyIDCrawler(SpotifyCrawler):
+class SpotifyIDCrawler(SpotifyCrawler, metaclass=Singleton):
     def get_id_by_title(self, song_title: str) -> Optional[str]:
         result = self._search_query(song_title)
         items = result["tracks"]["items"]
