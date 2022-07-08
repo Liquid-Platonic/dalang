@@ -36,6 +36,7 @@ You have to compile `transformers` from source using Rust. Please follow run the
 - `git clone https://github.com/huggingface/tokenizers`
 - `pip install setuptools_rust`
 - `cd tokenizers/bindings/python && python setup.py install`
+- `pip install torch==1.11.0 torchaudio==0.11.0`
 
 You can find more info here: https://towardsdatascience.com/hugging-face-transformers-on-apple-m1-26f0705874d7.
 
