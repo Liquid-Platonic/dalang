@@ -926,10 +926,18 @@ python-versions = ">=3.6"
 idna = ">=2.0"
 multidict = ">=4.0"
 
+[[package]]
+name = "youtube-dl"
+version = "2021.12.17"
+description = "YouTube video downloader"
+category = "main"
+optional = false
+python-versions = "*"
+
 [metadata]
 lock-version = "1.1"
 python-versions = "~3.8"
-content-hash = "0f57f45153b27bc318b9691bcc5aa099ef7bf1aa768c5c5ec5124e9803100abe"
+content-hash = "0fa250560c1710a750ca7566f59a11caaafd13fd3eee5efc45390a63f0dbfbcb"
 
 [metadata.files]
 aiohttp = []
@@ -1411,3 +1419,4 @@ wrapt = [
     {file = "wrapt-1.14.1.tar.gz", hash = "sha256:380a85cf89e0e69b7cfbe2ea9f765f004ff419f34194018a6827ac0e3edfed4d"},
 ]
 yarl = []
+youtube-dl = []
