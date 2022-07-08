@@ -9,6 +9,4 @@ print("moods", moods)
 
 keywords = {"happy": 1, "ambient": 1}
 spotify_ids = cyanite_api.get_spotify_ids_by_keywords(keywords)
-
-
 print(spotify_ids)
