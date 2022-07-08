@@ -1,4 +1,4 @@
-from dalang.config.config import SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET
+from dalang.config.configs import SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET
 from dalang.crawling.spotifyconnection import SpotifyConnection
 from dalang.crawling.spotifyidcrawler import SpotifyIDCrawler
 from dalang.crawling.spotifyrecommendationscrawler import (

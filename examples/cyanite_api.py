@@ -1,7 +1,7 @@
 import json
 
 from dalang.apis.utils import query_and_get_results
-from dalang.config.config import ACCESS_TOKEN, API_URL
+from dalang.config.configs import ACCESS_TOKEN, API_URL
 from dalang.tagging.tags import CYANITE_GENRES, CYANITE_MOODS
 
 endpoint = API_URL

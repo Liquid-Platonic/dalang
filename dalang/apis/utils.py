@@ -1,6 +1,6 @@
 import requests
 
-from dalang.config.config import ACCESS_TOKEN, API_URL
+from dalang.config.configs import ACCESS_TOKEN, API_URL
 
 
 def query_and_get_results(endpoint, query, headers):

@@ -1,5 +1,5 @@
 from dalang.apis.utils import get_genres, get_moods, get_moods_advanced
-from dalang.config.config import ACCESS_TOKEN, API_URL
+from dalang.config.configs import ACCESS_TOKEN, API_URL
 
 endpoint = API_URL
 headers = {"Authorization": f"Bearer {ACCESS_TOKEN}"}
