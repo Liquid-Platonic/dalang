@@ -2,7 +2,7 @@ import json
 
 from dalang.apis.utils import query_and_get_results
 from dalang.config.configs import ACCESS_TOKEN, API_URL
-from dalang.tagging.tags import CYANITE_GENRES, CYANITE_MOODS
+from dalang.tagging.tags import CyaniteGenres, CyaniteMoods
 
 endpoint = API_URL
 headers = {"Authorization": f"Bearer {ACCESS_TOKEN}"}
@@ -10,8 +10,8 @@ headers = {"Authorization": f"Bearer {ACCESS_TOKEN}"}
 spotify_id = "7iQM9DQUFKUSNjVt8GQZV2"
 
 # Get genres & moods
-genres = "\n".join(CYANITE_GENRES)
-moods = "\n".join(CYANITE_MOODS)
+genres = "\n".join(CyaniteGenres.to_list())
+moods = "\n".join(CyaniteMoods.to_list())
 query = f"""
 {{
     spotifyTrack(id: "{spotify_id}") {{

@@ -1,13 +1,13 @@
 from enum import Enum, auto
 
 
-class TagsEnum(Enum):
+class ExtendedEnum(Enum):
     @classmethod
     def to_list(cls):
         return [item.name for item in cls]
 
 
-class CyaniteMoods(TagsEnum):
+class CyaniteMoods(ExtendedEnum):
     aggressive = auto()
     calm = auto()
     chilled = auto()
@@ -23,25 +23,25 @@ class CyaniteMoods(TagsEnum):
     uplifting = auto()
 
 
-class CyaniteGenres(TagsEnum):
-    ambient: auto()
-    blues: auto()
-    classical: auto()
-    electronicDance: auto()
-    folkCountry: auto()
-    jazz: auto()
-    funkSoul: auto()
-    latin: auto()
+class CyaniteGenres(ExtendedEnum):
+    ambient = auto()
+    blues = auto()
+    classical = auto()
+    electronicDance = auto()
+    folkCountry = auto()
+    jazz = auto()
+    funkSoul = auto()
+    latin = auto()
 
 
-class SpeechbrainMoods(TagsEnum):
-    neutral: auto()
-    anger: auto()
-    hap: auto()
-    sad: auto()
+class SpeechbrainMoods(ExtendedEnum):
+    neutral = auto()
+    anger = auto()
+    hap = auto()
+    sad = auto()
 
 
-class DistilbertMoods(TagsEnum):
+class DistilbertMoods(ExtendedEnum):
     sadness: auto()
     joy: auto()
     love: auto()
