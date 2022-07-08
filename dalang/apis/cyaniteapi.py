@@ -60,9 +60,9 @@ class CyaniteApi:
     @staticmethod
     def _convert_keywords_to_str(keywords: TagPredictions) -> str:
         #  keyword: "sad", weight: 1
-        keywords_str = "["
+        keywords_str = "[\n"
         for name, weight in keywords.items():
-            keywords_str += f'{{keyword: "{name}", weight: {weight}}}'
+            keywords_str += f'{{keyword: "{name}", weight: {weight}}} \n'
         keywords_str += "]"
         return keywords_str
 
