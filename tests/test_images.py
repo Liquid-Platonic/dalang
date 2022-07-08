@@ -4,14 +4,12 @@ from dalang.crawling.spotifyidcrawler import SpotifyIDCrawler
 from dalang.crawling.spotifyrecommendationscrawler import (
     SpotifyRecommendationsCrawler,
 )
+from dalang.tagging.speechbraintocyanitemapper import (
+    SpeechbrainToCyaniteMapper,
+)
 
 
 def test_crawler():
-    spotify_connection = SpotifyConnection(
-        SPOTIFY_CLIENT_ID, SPOTIFY_CLIENT_SECRET
-    )
-    crawler = SpotifyIDCrawler(spotify_connection)
-    result = crawler.get_id_by_title("squarepusher - red hot car")
-    crawler = SpotifyRecommendationsCrawler(spotify_connection)
-    result = crawler.get_recommendation_by_ids([result])
+    mapper = SpeechbrainToCyaniteMapper()
+    result = mapper.map({"anger": 0.5, "hap": 0.5, "sad": 0.5, "neutral": 0.5})
     x = 5
