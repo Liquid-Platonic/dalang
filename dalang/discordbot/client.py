@@ -1,6 +1,6 @@
 from typing import Optional
 
-from discord import Bot, Guild, Intents, VoiceClient
+from discord import Guild, Intents, VoiceClient
 from discord.ext import commands
 
 intents = Intents.default()
