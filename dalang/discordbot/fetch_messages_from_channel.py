@@ -1,4 +1,4 @@
-from _datetime import datetime, timedelta
+from datetime import datetime, timedelta
 
 from .client import bot
 
@@ -9,10 +9,11 @@ async def fetch_messages_from_channel(text_channel, minutes=None):
     # take messages_history x minutes before until now in utc or take messages_history of all time
     messages_history = (
         text_channel.history(
-            after=datetime.utcnow() - timedelta(minutes=minutes)
+            limit=None,
+            after=datetime.now() - timedelta(minutes=minutes),
         )
         if minutes
-        else text_channel.history()
+        else text_channel.history(limit=None)
     )
 
     async for message in messages_history:
