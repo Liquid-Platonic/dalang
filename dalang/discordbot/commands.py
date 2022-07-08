@@ -7,6 +7,9 @@ from dalang.discordbot.client import bot, find_voice_client
 from dalang.discordbot.fetch_messages_from_channel import (
     fetch_messages_from_channel,
 )
+from dalang.discordbot.fetch_youtube_links_from_channel import (
+    fetch_youtube_links_from_channel,
+)
 from dalang.discordbot.save_recordings import save_recordings
 
 
@@ -79,31 +82,8 @@ async def messages(ctx):
 
 @bot.command()
 async def youtube_songs(ctx):
-    yt_pattern = re.compile(
-        "http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?"
-    )
     text_channels = ctx.guild.text_channels
-    yt_songs = []
-
-    for text_channel in text_channels:
-        channel_messages = await fetch_messages_from_channel(
-            text_channel=text_channel
-        )
-        for channel_message in channel_messages:
-            if yt_pattern.match(channel_message["message"]):
-                with YoutubeDL({}) as ydl:
-                    info_dict = ydl.extract_info(
-                        channel_message["message"], download=False
-                    )
-                    video_url = info_dict.get("url", None)
-                    video_id = info_dict.get("id", None)
-                    video_title = info_dict.get("title", None)
-                    yt_songs.append(
-                        {
-                            "video_url": video_url,
-                            "video_id": video_id,
-                            "title": video_title,
-                        }
-                    )
-
-    print(yt_songs)
+    songs = await fetch_youtube_links_from_channel(
+        text_channels, ctx.guild.name
+    )
+    print(songs)
