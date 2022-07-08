@@ -14,7 +14,7 @@ class SpotifyConnection:
 
     def _get_spotify_connection(
         self, client_id: str = None, client_secret: str = None
-    ) -> spotipy.Spotify:
+    ) -> None:
         client_credentials_manager = SpotifyClientCredentials(
             client_id=client_id, client_secret=client_secret
         )
