@@ -1,6 +1,7 @@
 from dotenv import load_dotenv
 
 import dalang.config.configs as config
+import dalang.discordbot.commands
 from dalang.discordbot.client import bot
 
 load_dotenv()
