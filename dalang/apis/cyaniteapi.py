@@ -8,7 +8,9 @@ from dalang.tagging.tags import CyaniteGenres, CyaniteMoods
 
 
 class CyaniteApi:
-    def __init__(self, access_token: str = ACCESS_TOKEN, api_url: str = API_URL) -> None:
+    def __init__(
+        self, access_token: str = ACCESS_TOKEN, api_url: str = API_URL
+    ) -> None:
         self.headers = {"Authorization": f"Bearer {access_token}"}
         self.api_url = api_url
 
@@ -21,7 +23,9 @@ class CyaniteApi:
         return "\n".join(CyaniteMoods.to_list())
 
     def _query_and_get_results(self, query):
-        r = requests.post(self.api_url, json={"query": query}, headers=self.headers)
+        r = requests.post(
+            self.api_url, json={"query": query}, headers=self.headers
+        )
         if r.status_code == 200:
             return r.json()
         else:
@@ -48,9 +52,9 @@ class CyaniteApi:
             }}
         }}
         """
-        results = self._query_and_get_results(query)["data"]["spotifyTrack"]["audioAnalysisV6"][
-            "result"
-        ]
+        results = self._query_and_get_results(query)["data"]["spotifyTrack"][
+            "audioAnalysisV6"
+        ]["result"]
         return results["genre"], results["mood"]
 
     @staticmethod
@@ -62,7 +66,9 @@ class CyaniteApi:
         keywords_str += "]"
         return keywords_str
 
-    def get_spotify_ids_by_keywords(self, keywords: TagPredictions) -> List[str]:
+    def get_spotify_ids_by_keywords(
+        self, keywords: TagPredictions
+    ) -> List[str]:
         query = f"""
             query KeywordSearchQuery {{
                 keywordSearch(
@@ -86,5 +92,7 @@ class CyaniteApi:
                 }}
             }}
             """
-        edges = self._query_and_get_results(query)["data"]["keywordSearch"]["edges"]
+        edges = self._query_and_get_results(query)["data"]["keywordSearch"][
+            "edges"
+        ]
         return [edge["node"]["id"] for edge in edges]
