@@ -48,8 +48,3 @@ class DistilbertMoods(ExtendedEnum):
     anger: auto()
     fear: auto()
     surprise: auto()
-
-
-# "funkSoul" -> "soul funk"
-# "electronicDance" -> ['electronic', 'electronic music', 'electronica', 'dance electronica']
-# "folkCountry" -> "country folk"
