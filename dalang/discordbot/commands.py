@@ -1,8 +1,11 @@
-import asyncio
+from datetime import datetime, timedelta
 
-from discord.sinks import MP3Sink, WaveSink
+from discord.sinks import MP3Sink
 
 from dalang.discordbot.client import bot, find_voice_client
+from dalang.discordbot.fetch_messages_from_channel import (
+    fetch_messages_from_channel,
+)
 from dalang.discordbot.save_recordings import save_recordings
 
 
@@ -49,3 +52,25 @@ async def stop(ctx):
 
     if voice_client.recording:
         voice_client.stop_recording()
+
+
+@bot.command()
+async def messages(ctx):
+    text_channels = ctx.guild.text_channels
+    channel_messages = {}
+    for text_channel in text_channels:
+        channel_name = text_channel.name
+        msgs = await fetch_messages_from_channel(
+            text_channel=text_channel, minutes=5
+        )
+        channel_messages[channel_name] = msgs
+
+    """
+    messages object is like that!
+    {
+        "channel_name_1": [{author, message, time}],
+        "channel_name_2": [{author, message, time}],
+        "channel_name_2": [{author, message, time}],
+    }
+    """
+    return channel_messages
