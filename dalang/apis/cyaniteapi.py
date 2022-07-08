@@ -16,6 +16,14 @@ class CyaniteApi:
         self.headers = {"Authorization": f"Bearer {access_token}"}
         self.api_url = api_url
 
+    @property
+    def genres(self) -> List[str]:
+        return "\n".join(CyaniteGenres.to_list())
+
+    @property
+    def moods(self) -> List[str]:
+        return "\n".join(CyaniteMoods.to_list())
+
     def _query_and_get_results(self, query):
         r = requests.post(self.api_url, json={"query": query}, headers=self.headers)
         if r.status_code == 200:
@@ -24,8 +32,6 @@ class CyaniteApi:
             raise Exception(f"Query failed to run with a {r.status_code}.")
 
     def get_moods_and_genres(self, spotify_id: str) -> Tuple[TagPredictions]:
-        genres = "\n".join(CyaniteGenres.to_list())
-        moods = "\n".join(CyaniteMoods.to_list())
         query = f"""
         {{
             spotifyTrack(id: "{spotify_id}") {{
@@ -34,10 +40,10 @@ class CyaniteApi:
                         ... on AudioAnalysisV6Finished {{
                             result {{
                                 genre {{
-                                    {genres}
+                                    {self.genres}
                                 }}
                                 mood {{
-                                    {moods}
+                                    {self.moods}
                                 }}
                             }}
                         }}
@@ -86,20 +92,3 @@ class CyaniteApi:
             """
         edges = self._query_and_get_results(query)["data"]["keywordSearch"]["edges"]
         return [edge["node"]["id"] for edge in edges]
-
-
-class CyaniteTagsPredictor:
-    def __init__(
-        self,
-        cyanite_api: CyaniteApi(),
-        cyanite_genre_mapper: CyaniteGenreToKeywordsMapper = CyaniteGenreToKeywordsMapper(),
-    ) -> None:
-        self.cyanite_api = cyanite_api
-        self.cyanite_genre_mapper = cyanite_genre_mapper
-
-    def _predict_single(self, spotify_id: str) -> Tuple[TagPredictions]:
-        pass
-
-    def predict(self, spotify_ids: List[str]) -> List[Tuple[TagPredictions]]:
-        pass
-
