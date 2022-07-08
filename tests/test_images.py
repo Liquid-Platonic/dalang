@@ -4,8 +4,8 @@ from dalang.crawling.spotifyidcrawler import SpotifyIDCrawler
 from dalang.crawling.spotifyrecommendationscrawler import (
     SpotifyRecommendationsCrawler,
 )
-from dalang.tagging.distilberttocyanitemapper import DistilbertToCyaniteMapper
-from dalang.tagging.speechbraintocyanitemapper import (
+from dalang.tagging.distilberttokeywordsmapper import DistilbertToCyaniteMapper
+from dalang.tagging.speechbraintokeywordsmapper import (
     SpeechbrainToCyaniteMapper,
 )
 

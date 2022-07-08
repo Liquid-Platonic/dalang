@@ -33,6 +33,27 @@ query = f"""
 }}
 """
 
+# Get all available keywords
+def _get_keywords_from_response(response):
+    edges = response["data"]["keywords"]["edges"]
+    return [edge["node"]["keyword"] for edge in edges]
+
+
+query = f"""
+{{
+    keywords {{
+        edges {{
+            node {{
+                keyword
+            }}
+        }}
+    }}
+}}
+"""
+
 results = query_and_get_results(endpoint, query, headers)
-pretty_results = json.dumps(results, indent=2)
-print(pretty_results)
+keywords = _get_keywords_from_response(results)
+# pretty_results = json.dumps(results, indent=2)
+print(keywords)
+
+x = 5
