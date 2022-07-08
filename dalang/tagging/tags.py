@@ -1,11 +1,50 @@
-from dalang.apis.utils import get_genres, get_moods, get_moods_advanced
-from dalang.config.configs import ACCESS_TOKEN, API_URL
+from enum import Enum, auto
 
-endpoint = API_URL
-headers = {"Authorization": f"Bearer {ACCESS_TOKEN}"}
 
-CYANITE_MOODS = get_moods(endpoint, headers)[:-1]
-CYANITE_MOODS_ADVANCED = get_moods_advanced(endpoint, headers)
-CYANITE_GENRES = get_genres(endpoint, headers)
-SPEECHBRAIN_MOODS = ["neutral", "anger", "hap", "sad"]
-DISTILBERT_MOODS = ["sadness", "joy", "love", "anger", "fear", "surprise"]
+class TagsEnum(Enum):
+    @classmethod
+    def to_list(cls):
+        return [item.name for item in cls]
+
+
+class CyaniteMoods(TagsEnum):
+    aggressive = auto()
+    calm = auto()
+    chilled = auto()
+    dark = auto()
+    energetic = auto()
+    epic = auto()
+    happy = auto()
+    romantic = auto()
+    sad = auto()
+    scary = auto()
+    sexy = auto()
+    ethereal = auto()
+    uplifting = auto()
+
+
+class CyaniteGenres(TagsEnum):
+    ambient: auto()
+    blues: auto()
+    classical: auto()
+    electronicDance: auto()
+    folkCountry: auto()
+    jazz: auto()
+    funkSoul: auto()
+    latin: auto()
+
+
+class SpeechbrainMoods(TagsEnum):
+    neutral: auto()
+    anger: auto()
+    hap: auto()
+    sad: auto()
+
+
+class DistilbertMoods(TagsEnum):
+    sadness: auto()
+    joy: auto()
+    love: auto()
+    anger: auto()
+    fear: auto()
+    surprise: auto()
