@@ -1,5 +1,6 @@
 import asyncio
 
+import discord
 from discord.sinks import MP3Sink, WaveSink
 
 from dalang.discordbot.client import bot, find_voice_client
@@ -59,15 +60,20 @@ async def monitor(ctx):
         find_mood_from_recordings,  # What to do once done.
         ctx.channel,  # The channel to disconnect from.
     )
+    await asyncio.sleep(5)
 
     await ctx.send(f"Start Monitoring")
 
     for index in range(100):
         await asyncio.sleep(5)
-
         if voice_client.recording:
             await ctx.send(":stop_sign: Stopping record!")
             voice_client.stop_recording()
+
+            await asyncio.sleep(10)
+            voice_client.play(
+                discord.FFmpegPCMAudio(f"temp/file{ctx.author.id}.wav")
+            )
 
         await asyncio.sleep(5)
         if not voice_client.recording:
