@@ -1,13 +1,9 @@
-from ast import keyword
 from typing import List, Tuple
 
 import requests
 
 from dalang.config.configs import ACCESS_TOKEN, API_URL
 from dalang.tagging import TagPredictions
-from dalang.tagging.cyanitegenretokeywordsmapper import (
-    CyaniteGenreToKeywordsMapper,
-)
 from dalang.tagging.tags import CyaniteGenres, CyaniteMoods
 
 
