@@ -1,3 +1,7 @@
+import warnings
+
+warnings.filterwarnings("ignore")
+
 from discord import Message
 from discord.ext.commands import Context
 from dotenv import load_dotenv

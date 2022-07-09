@@ -26,7 +26,11 @@ from dalang.discordbot.save_recordings import (
 )
 from dalang.discordbot.views import MoodSelectView
 from dalang.discordbot.youtube_to_genre_mood import youtube_to_genre_mood
-from dalang.helpers import get_top_dict_items, merge_dicts
+from dalang.helpers import (
+    get_top_dict_items,
+    merge_dicts,
+    merge_list_of_dicts_by_average,
+)
 from dalang.models import cyanite_model, text_to_mood_model
 from dalang.postprocessing.averagepredictionsaggregator import (
     AveragePredictionsAggregator,
@@ -202,11 +206,6 @@ async def recommend(ctx, num_of_songs=2):
     messages = mess_db.messages[guild]
     links = mess_db.links[guild]
 
-    links_genre_predictions = links.genre
-
-    links_mood_predictions = links.mood
-    text_moods_predictions = messages.mood
-
     last_speech_mood = speech_moods[0]
     average_aggregator = AveragePredictionsAggregator()
     speech_mood = average_aggregator.aggregate(
@@ -216,6 +215,21 @@ async def recommend(ctx, num_of_songs=2):
     average_mood_with_text_and_links = average_aggregator.aggregate(
         [speech_mood, messages.mood, links.mood or {}]
     )
+
+    if mess_db.user_genre not in links.genre:
+        links.genre[mess_db.user_genre] = 0
+
+    links_genre_predictions = merge_list_of_dicts_by_average(
+        [{mess_db.user_genre: 1.0}, links.genre]
+    )
+
+    if mess_db.user_mood not in average_mood_with_text_and_links:
+        average_mood_with_text_and_links[mess_db.user_mood] = 0
+
+    average_mood_with_text_and_links = merge_list_of_dicts_by_average(
+        [{mess_db.user_mood: 1.0}, average_mood_with_text_and_links]
+    )
+
     keywords = merge_dicts(
         [
             get_top_dict_items(average_mood_with_text_and_links, 4),
@@ -241,7 +255,7 @@ async def recommend(ctx, num_of_songs=2):
 
 
 @bot.command()
-async def set_genre_mood(ctx, arg1=None, arg2=None):
+async def input_genre_and_mood(ctx, arg1=None, arg2=None):
     genre = None
     mood = None
     if arg1 == "help":
@@ -249,9 +263,9 @@ async def set_genre_mood(ctx, arg1=None, arg2=None):
             f"""You can specify genre and mood: \n 
         genres: {UserInputGenres.to_list()}
         moods: {UserInputMoods.to_list()}
-        example with both genre and mood: /set_genre_mood ambient epic\n 
-        example with both genre : /set_genre_mood ambient -\n 
-        example with both mood: /set_genre_mood - epic
+        example with both genre and mood: /youtube_to_cyanite_tags_with_args ambient epic\n 
+        example with both genre : /youtube_to_cyanite_tags_with_args ambient -\n 
+        example with both mood: /youtube_to_cyanite_tags_with_args - epic
         """
         )
     elif not (arg1 and arg2):
@@ -259,21 +273,20 @@ async def set_genre_mood(ctx, arg1=None, arg2=None):
             f"""You can specify genre and mood: \n 
         genres: {UserInputGenres.to_list()}
         moods: {UserInputMoods.to_list()}
-        example with both genre and mood: /set_genre_mood ambient epic\n 
-        example with both genre : /set_genre_mood ambient -\n 
-        example with both mood: /set_genre_mood - epic
+        example with both genre and mood: /youtube_to_cyanite_tags_with_args ambient epic\n 
+        example with both genre : /youtube_to_cyanite_tags_with_args ambient -\n 
+        example with both mood: /youtube_to_cyanite_tags_with_args - epic
         """
         )
     elif arg2 == "-":
         genre = arg1
-        await ctx.send("run business logic with genre")
     elif arg1 == "-":
         mood = arg2
-        await ctx.send("run business logic with mood")
     elif arg1 and arg2:
         genre = arg1
         mood = arg2
-        await ctx.send("run business logic with genre and mood")
-
-    message_db(ctx.guild).set_genre(genre)
-    message_db(ctx.guild).set_mood(mood)
+    if genre:
+        message_db(ctx.guild).set_genre(genre)
+    if mood:
+        message_db(ctx.guild).set_mood(mood)
+    await ctx.send(f"Run bussines logic with genre:{genre}, mood:{mood}")
