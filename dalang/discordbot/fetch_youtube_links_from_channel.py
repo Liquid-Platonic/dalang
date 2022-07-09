@@ -34,9 +34,14 @@ async def fetch_youtube_links_from_channel(
     yt_songs = []
     yt_links = set()
     for text_channel in text_channels:
-        channel_messages = await fetch_messages_from_channel(
-            text_channel=text_channel, minutes=window_minutes
-        )
+        if window_minutes:
+            channel_messages = await fetch_messages_from_channel(
+                text_channel=text_channel, minutes=window_minutes
+            )
+        else:
+            channel_messages = await fetch_all_messages_from_channel(
+                text_channel=text_channel
+            )
 
         for channel_message in channel_messages:
             if not yt_pattern.match(channel_message["message"]):

@@ -1,7 +1,7 @@
 import asyncio
 import re
 from collections import defaultdict
-from typing import List
+from typing import List, Optional
 
 import discord
 from discord.sinks import MP3Sink, WaveSink
@@ -164,9 +164,16 @@ async def youtube_songs(ctx):
 
 
 @bot.command()
-async def youtube_to_cyanite_tags(ctx, window_minutes: int = 5):
+async def youtube_to_cyanite_tags(
+    ctx,
+    text_channel: Optional[str] = None,
+    window_minutes: Optional[int] = None,
+):
     text_channels = ctx.guild.text_channels
-    genres, moods, spotify_ids = youtube_to_genre_mood(
+    if text_channel:
+        text_channels = [tc for tc in text_channels if tc.name == text_channel]
+
+    genres, moods, spotify_ids = await youtube_to_genre_mood(
         text_channels, window_minutes
     )
     await ctx.send(spotify_ids)

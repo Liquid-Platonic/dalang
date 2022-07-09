@@ -22,7 +22,7 @@ async def fetch_all_messages_from_channel(
     guild_messages[cache_key] = dict(
         messages=messages, cached_at=datetime.now()
     )
-    return guild_messages[cache_key]
+    return guild_messages[cache_key]["messages"]
 
 
 async def fetch_messages_from_channel(text_channel, minutes=None):
