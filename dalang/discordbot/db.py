@@ -259,13 +259,19 @@ class MessageDB:
         return self.messages[self.guild.name].channels[name]
 
     async def on_channel_update(
-        self, channel: TextChannel, c_mood, c_genre, p_mood, p_genre
+        self,
+        channel: TextChannel,
+        c_mood,
+        c_genre,
+        p_mood,
+        p_genre,
+        isLink: bool,
     ):
         dm = find_dominant_mood(c_mood) or {}
         dominant_mood = dm.get("mood", None)
         pm = find_dominant_mood(p_mood) or {}
         p_dominant_mood = pm.get("mood", None)
-        if channel and dominant_mood != p_dominant_mood:
+        if channel and dominant_mood != p_dominant_mood and not isLink:
             # await channel.send(
             #     f"Channel `{channel.name}` mood was changed from {p_dominant_mood} to {dominant_mood}"
             # )
