@@ -1,4 +1,7 @@
 from datetime import datetime, timedelta
+from typing import List
+
+from discord import Message
 
 from .client import bot
 
@@ -25,7 +28,9 @@ async def fetch_all_messages_from_channel(
     return guild_messages[cache_key]["messages"]
 
 
-async def fetch_messages_from_channel(text_channel, minutes=None):
+async def fetch_messages_from_channel(
+    text_channel, minutes=None
+) -> List[Message]:
     channel_messages = []
 
     # take messages_history x minutes before until now in utc or take messages_history of all time
@@ -40,11 +45,6 @@ async def fetch_messages_from_channel(text_channel, minutes=None):
 
     async for message in messages_history:
         if not message.author == bot.user:
-            message_details = {
-                "author": message.author,
-                "message": message.content,
-                "time": message.created_at,
-            }
-            channel_messages.append(message_details)
+            channel_messages.append(message)
 
     return channel_messages

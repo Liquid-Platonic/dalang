@@ -1,6 +1,6 @@
 import re
 from datetime import datetime, timedelta
-from typing import List
+from typing import Any, Dict, List
 
 from discord import TextChannel
 from youtube_dl import YoutubeDL
@@ -13,21 +13,25 @@ from dalang.discordbot.fetch_messages_from_channel import (
 links = dict()
 
 
+def fetch_title_from_link(yt_link: str) -> Dict[str, Any]:
+    with YoutubeDL({}) as ydl:
+        info_dict = ydl.extract_info(yt_link, download=False)
+        video_url = info_dict.get("url", None)
+        video_id = info_dict.get("id", None)
+        video_title = info_dict.get("title", None)
+        return {
+            "video_url": video_url,
+            "video_id": video_id,
+            "title": video_title,
+        }
+
+
 async def fetch_youtube_links_from_channel(
     text_channels: List[TextChannel],
     cache_key=None,
     cache_time: int = 5,
     window_minutes: int = 5,
 ):
-    if cache_key and cache_key in links:
-        if (
-            datetime.now() - timedelta(minutes=cache_time)
-            < links[cache_key]["cached_at"]
-        ):
-            return links[cache_key]
-        else:
-            links.pop(cache_key)
-
     yt_pattern = re.compile(
         "http(?:s?):\/\/(?:www\.)?youtu(?:be\.com\/watch\?v=|\.be\/)([\w\-\_]*)(&(amp;)?‌​[\w\?‌​=]*)?"
     )
@@ -52,17 +56,5 @@ async def fetch_youtube_links_from_channel(
             yt_links.add(yt_link)
 
     for yt_link in yt_links:
-        with YoutubeDL({}) as ydl:
-            info_dict = ydl.extract_info(yt_link, download=False)
-            video_url = info_dict.get("url", None)
-            video_id = info_dict.get("id", None)
-            video_title = info_dict.get("title", None)
-            yt_songs.append(
-                {
-                    "video_url": video_url,
-                    "video_id": video_id,
-                    "title": video_title,
-                }
-            )
-    links[cache_key] = dict(songs=yt_songs, cached_at=datetime.now())
-    return [s["title"] for s in links[cache_key]["songs"]]
+        yt_songs.append(fetch_title_from_link(yt_link))
+    return [s["title"] for s in yt_songs]
