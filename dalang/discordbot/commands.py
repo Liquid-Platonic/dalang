@@ -3,6 +3,7 @@ import re
 from discord.sinks import MP3Sink
 from youtube_dl import YoutubeDL
 
+from dalang.crawling import spotify_id_crawler
 from dalang.discordbot.client import bot, find_voice_client
 from dalang.discordbot.fetch_messages_from_channel import (
     fetch_messages_from_channel,
@@ -11,6 +12,10 @@ from dalang.discordbot.fetch_youtube_links_from_channel import (
     fetch_youtube_links_from_channel,
 )
 from dalang.discordbot.save_recordings import save_recordings
+from dalang.models import cyanite_model
+from dalang.postprocessing.averagepredictionsaggregator import (
+    AveragePredictionsAggregator,
+)
 
 
 @bot.command(name="dalang")
@@ -87,3 +92,18 @@ async def youtube_songs(ctx):
         text_channels, ctx.guild.name
     )
     print(songs)
+
+
+@bot.command()
+async def youtube_to_cyanite_tags(ctx, window_minutes: int = 5):
+    text_channels = ctx.guild.text_channels
+    yt_titles = await fetch_youtube_links_from_channel(
+        text_channels, window_minutes=window_minutes
+    )
+    spotify_ids = spotify_id_crawler.get_ids_by_titles(yt_titles)
+    genres = AveragePredictionsAggregator.aggregate(cyanite_tags["genres"])
+    moods = AveragePredictionsAggregator.aggregate(cyanite_tags["moods"])
+    cyanite_tags = cyanite_model.predict(spotify_ids)
+    await ctx.send(spotify_ids)
+    await ctx.send({"genres": genres, "moods": moods})
+    return genres, moods
