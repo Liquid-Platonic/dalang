@@ -1,15 +1,14 @@
 import asyncio
 import re
-from typing import List
 from collections import defaultdict
+from typing import List
 
 import discord
 from discord.sinks import MP3Sink, WaveSink
 from youtube_dl import YoutubeDL
 
-from dalang.crawling import spotify_id_crawler
 from dalang.apis.cyaniteapi import CyaniteApi
-from dalang.crawling import SpotifyIDCrawler
+from dalang.crawling import SpotifyIDCrawler, spotify_id_crawler
 from dalang.discordbot.client import bot, find_voice_client
 from dalang.discordbot.fetch_messages_from_channel import (
     fetch_messages_from_channel,
@@ -21,13 +20,17 @@ from dalang.discordbot.mood_collector import mood_collector
 from dalang.discordbot.prepare_channel_messages_for_text_to_mood import (
     prepare_channel_messages_for_text_to_mood,
 )
-from dalang.models import cyanite_model
-from dalang.discordbot.save_recordings import find_mood_from_recordings, save_recordings
-
-from dalang.models import text_to_mood_model
+from dalang.discordbot.save_recordings import (
+    find_mood_from_recordings,
+    save_recordings,
+)
+from dalang.discordbot.youtube_to_genre_mood import youtube_to_genre_mood
+from dalang.helpers import merge_dicts
+from dalang.models import cyanite_model, text_to_mood_model
 from dalang.postprocessing.averagepredictionsaggregator import (
     AveragePredictionsAggregator,
 )
+
 
 @bot.command(name="dalang")
 async def dalang(ctx):
@@ -163,17 +166,15 @@ async def youtube_songs(ctx):
 @bot.command()
 async def youtube_to_cyanite_tags(ctx, window_minutes: int = 5):
     text_channels = ctx.guild.text_channels
-    yt_titles = await fetch_youtube_links_from_channel(
-        text_channels, window_minutes=window_minutes
+    genres, moods, spotify_ids = youtube_to_genre_mood(
+        text_channels, window_minutes
     )
-    spotify_ids = spotify_id_crawler.get_ids_by_titles(yt_titles)
-    genres = AveragePredictionsAggregator.aggregate(cyanite_tags["genres"])
-    moods = AveragePredictionsAggregator.aggregate(cyanite_tags["moods"])
-    cyanite_tags = cyanite_model.predict(spotify_ids)
     await ctx.send(spotify_ids)
     await ctx.send({"genres": genres, "moods": moods})
     return genres, moods
 
+
+@bot.command()
 async def recommend(ctx, num_of_songs=2):
     guild = ctx.guild.name
 
@@ -182,15 +183,29 @@ async def recommend(ctx, num_of_songs=2):
         await ctx.send("Need to monitor before recommending")
         return
 
+    text_channels = ctx.guild.text_channels
+    links_genre_predictions, links_mood_predictions, _ = youtube_to_genre_mood(
+        text_channels, 10
+    )
+
+    model_inputs = await prepare_channel_messages_for_text_to_mood(ctx)
+    text_prediction = text_to_mood_model.predict(model_inputs)
+
     last_speech_mood = speech_moods[0]
     average_aggregator = AveragePredictionsAggregator()
     average_mood = average_aggregator.aggregate(
         [mood_vector for user, mood_vector in last_speech_mood.items()]
     )
 
-    spotify_ids = CyaniteApi().get_spotify_ids_by_keywords(average_mood)
+    average_mood_with_text_and_links = average_aggregator.aggregate(
+        [average_mood, text_prediction, links_mood_predictions]
+    )
+    keywords = merge_dicts(
+        average_mood_with_text_and_links, links_genre_predictions
+    )
+    spotify_ids = CyaniteApi().get_spotify_ids_by_keywords(keywords)
 
-    await ctx.send(average_mood)
+    await ctx.send(average_mood_with_text_and_links)
 
     # print track links
     if spotify_ids:
