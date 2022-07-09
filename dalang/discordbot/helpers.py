@@ -2,6 +2,9 @@ import re
 
 import nltk
 
+from dalang.helpers import get_top_dict_items, merge_dicts
+from dalang.tagging import TagPredictions
+
 english_words = set(nltk.corpus.words.words())
 emoji_pattern = re.compile(
     "["
@@ -53,3 +56,11 @@ def clean_string(string):
         if w.lower() in english_words or not w.isalpha()
     )
     return re.sub(emoji_pattern, "", string)
+
+
+def prepare_inputs_for_keyword_search(
+    genres: TagPredictions, moods: TagPredictions
+) -> TagPredictions:
+    top_genres = get_top_dict_items(genres, n=3)
+    top_moods = get_top_dict_items(moods, n=4)
+    return merge_dicts([top_genres, top_moods])
