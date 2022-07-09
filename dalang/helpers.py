@@ -32,3 +32,11 @@ def map_dict_keys(dict: Dict, mapping: Dict) -> Dict:
 def is_result_dict_valid(dict: Dict, threshold: float = 0.6) -> bool:
     """This can be used to check whether we can rely on a tag prediction given a threshold."""
     return any(value > threshold for value in dict.values())
+
+
+def merge_dicts(dicts: List[Dict]) -> Dict:
+    """This can be used to merge multiple dictionaries."""
+    merged_dict = {}
+    for dict_ in dicts:
+        merged_dict.update(dict_)
+    return merged_dict
