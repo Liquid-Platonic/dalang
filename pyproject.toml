@@ -22,7 +22,10 @@ PyNaCl = "^1.4.0"
 py-cord = {version = "2.0.0rc1", extras = ["voice"]}
 youtube_dl = "^2021.12.17"
 audiofile = "^1.1.0"
+torch = "1.11.0"
+librosa = "0.9.2"
 speechbrain = "^0.5.12"
+nltk = "^3.7"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"

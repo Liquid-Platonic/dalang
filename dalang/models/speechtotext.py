@@ -10,7 +10,7 @@ from dalang.models.huggingfacemodel import HuggingFaceModel
 from dalang.tagging import TagPredictions
 
 
-class Wav2Text(HuggingFaceModel):
+class Speech2Text(HuggingFaceModel):
     def __init__(self) -> None:
         self._get_processor()
         super().__init__()
