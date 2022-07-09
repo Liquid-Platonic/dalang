@@ -216,8 +216,8 @@ async def recommend(ctx, num_of_songs=2):
     )
     keywords = merge_dicts(
         [
-            get_top_dict_items(average_mood_with_text_and_links, 5),
-            get_top_dict_items(links_genre_predictions, 5),
+            get_top_dict_items(average_mood_with_text_and_links, 4),
+            get_top_dict_items(links_genre_predictions, 3),
         ]
     )
     spotify_ids = CyaniteApi().get_spotify_ids_by_keywords(keywords)
