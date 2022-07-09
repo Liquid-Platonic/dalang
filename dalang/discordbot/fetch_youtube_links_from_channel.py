@@ -1,5 +1,6 @@
 import re
 from datetime import datetime, timedelta
+from typing import List
 
 from discord import TextChannel
 from youtube_dl import YoutubeDL
@@ -13,7 +14,7 @@ links = dict()
 
 
 async def fetch_youtube_links_from_channel(
-    text_channels: [TextChannel],
+    text_channels: List[TextChannel],
     cache_key=None,
     cache_time: int = 5,
     window_minutes: int = 5,
