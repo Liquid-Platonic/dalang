@@ -1,4 +1,5 @@
 from discord import Message
+from discord.ext.commands import Context
 from dotenv import load_dotenv
 
 import dalang.config.configs as config
@@ -18,6 +19,8 @@ async def on_ready():
 @bot.event
 async def on_message(message: Message):
     message_db(message.guild).add(message)
+    ctx = await bot.get_context(message)
+    await bot.invoke(ctx)
 
 
 bot.run(config.DISCORD_TOKEN)

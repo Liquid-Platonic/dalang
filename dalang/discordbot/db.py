@@ -33,12 +33,14 @@ class DalangMessage:
 class DalangChannel:
     messages: List[DalangMessage] = field(default_factory=list)
     mood: Optional[TagPredictions] = None
+    genre: Optional[TagPredictions] = None
 
 
 @dataclass
 class DalangGuild:
     channels: Dict[str, DalangChannel] = field(default_factory=dict)
     mood: Optional[TagPredictions] = None
+    genre: Optional[TagPredictions] = None
     param_mood: Optional[str] = None
 
 
@@ -118,14 +120,70 @@ class MessageDB:
                 message.channel.name
             ] = DalangChannel()
 
+        previous_mood = None
+        previous_genre = None
         if self._is_str_yt_link(message.content):
-            self.links[self.guild.name].channels[
+            channel = self.links[self.guild.name].channels[
                 message.channel.name
-            ].messages.append(DalangMessage(message))
+            ]
+            genre, mood, spotify_id, found = self._calculate_link_mood(
+                message.content
+            )
+            channel.messages.append(DalangMessage(message, genre, mood, found))
+            previous_genre = (
+                self.messages[self.guild.name]
+                .channels[message.channel.name]
+                .genre
+            )
+            previous_mood = (
+                self.messages[self.guild.name]
+                .channels[message.channel.name]
+                .mood
+            )
         else:
+            mood = self._calculate_mood(message.content)
             self.messages[self.guild.name].channels[
                 message.channel.name
-            ].messages.append(DalangMessage(message))
+            ].messages.append(DalangMessage(message, mood))
+            previous_mood = (
+                self.messages[self.guild.name]
+                .channels[message.channel.name]
+                .mood
+            )
+
+        self.update_channel(self.get_channel(message.channel.name))
+        self.update_guild()
+
+        if self._is_str_yt_link(message.content):
+            current_mood = (
+                self.links[self.guild.name].channels[message.channel.name].mood
+            )
+            current_genre = (
+                self.links[self.guild.name]
+                .channels[message.channel.name]
+                .genre
+            )
+        else:
+            current_mood = (
+                self.messages[self.guild.name]
+                .channels[message.channel.name]
+                .mood
+            )
+            current_genre = (
+                self.messages[self.guild.name]
+                .channels[message.channel.name]
+                .genre
+            )
+
+        asyncio.create_task(
+            self.on_channel_update(
+                message.channel,
+                current_mood,
+                current_genre,
+                previous_mood,
+                previous_genre,
+            )
+        )
 
     def calculate_mood(self):
         guild = self.messages[self.guild.name]
@@ -141,13 +199,9 @@ class MessageDB:
                     did_message_changed = True
 
             if did_message_changed or not channel.mood:
-                channel.mood = average.aggregate(
-                    [m.mood for m in channel.messages if m.mood]
-                )
+                channel.mood = self._calculate_channel_mood(channel.messages)
 
-        guild.mood = average.aggregate(
-            [c.mood for c in guild.channels.values() if c.mood]
-        )
+        guild.mood = self._calculate_guild_mood(guild.channels.values())
         return guild.mood
 
     def calculate_link_mood(self):
@@ -167,14 +221,44 @@ class MessageDB:
                     did_message_changed = True
 
             if did_message_changed or not channel.mood:
-                channel.mood = average.aggregate(
-                    [m.mood for m in channel.messages if m.mood]
-                )
+                channel.mood = self._calculate_channel_mood(channel.messages)
+                channel.genre = self._calculate_channel_genre(channel.messages)
 
-        guild.mood = average.aggregate(
-            [c.mood for c in guild.channels.values() if c.mood]
-        )
+        guild.mood = self._calculate_guild_mood(guild.channels.values())
+        guild.genre = self._calculate_guild_genre(guild.channels.values())
         return guild.mood
+
+    @staticmethod
+    def _calculate_channel_mood(messages):
+        return (
+            average.aggregate_linear([m.mood for m in messages if m.mood])
+            if messages
+            else None
+        )
+
+    @staticmethod
+    def _calculate_channel_genre(messages):
+        return (
+            average.aggregate_linear([m.genre for m in messages if m.genre])
+            if messages
+            else None
+        )
+
+    @staticmethod
+    def _calculate_guild_mood(channels):
+        return (
+            average.aggregate([c.mood for c in channels if c.mood])
+            if channels
+            else None
+        )
+
+    @staticmethod
+    def _calculate_guild_genre(channels):
+        return (
+            average.aggregate([c.genre for c in channels if c.genre])
+            if channels
+            else None
+        )
 
     @staticmethod
     def _calculate_mood(message: str):
@@ -186,6 +270,30 @@ class MessageDB:
         if not found:
             return None, None, None, False
         return genre, mood, spotify_ids, True
+
+    def update_guild(self):
+        guild = self.messages[self.guild.name]
+        guild.mood = self._calculate_guild_mood(guild.channels.values())
+        link_guild = self.links[self.guild.name]
+        link_guild.mood = self._calculate_guild_mood(
+            link_guild.channels.values()
+        )
+
+    def update_channel(self, channel: DalangChannel):
+        channel.mood = self._calculate_channel_mood(channel.messages)
+        channel.genre = self._calculate_channel_genre(channel.messages)
+
+    def get_channel(self, name):
+        return self.messages[self.guild.name].channels[name]
+
+    async def on_channel_update(
+        self, channel: TextChannel, c_mood, c_genre, p_mood, p_genre
+    ):
+        if channel and c_mood != p_mood:
+            # await channel.send(f"Channel mood was changed from {p_mood} to {c_mood}")
+            return
+        else:
+            return
 
 
 dbs = {}
