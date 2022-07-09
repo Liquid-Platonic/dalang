@@ -4,6 +4,7 @@ import dalang.config.configs as config
 import dalang.discordbot.commands
 import dalang.discordbot.views
 from dalang.discordbot.client import bot
+from dalang.discordbot.db import message_db
 
 load_dotenv()
 
@@ -14,10 +15,8 @@ async def on_ready():
 
 
 @bot.event
-async def on_message(ctx, message):
-    dict = defaultdict(dict)
-    dict[ctx.guild.name][message.channel.name] = message
-    MessagesDB.add(message)
+async def on_message(message):
+    message_db(message.guild.name).add(message)
 
 
 bot.run(config.DISCORD_TOKEN)

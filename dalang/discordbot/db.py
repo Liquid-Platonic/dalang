@@ -4,13 +4,17 @@ from collections import defaultdict
 class MessageDB:
     data = {}
     links = {}
+    guild_name = None
 
     def __init__(self, guild_name: str):
         self.data[guild_name] = defaultdict(list)
         self.links[guild_name] = defaultdict(list)
+        self.guild_name = guild_name
+        if not guild_name:
+            raise ValueError("You must pass guild_name")
 
-    def add(self, message, guild: str):
-        self.data[guild][message.channel.name].append(message)
+    def add(self, message):
+        self.data[self.guild_name][message.channel.name].append(message)
 
         # if is link add to links
 
