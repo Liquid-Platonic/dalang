@@ -31,6 +31,7 @@ from dalang.models import cyanite_model, text_to_mood_model
 from dalang.postprocessing.averagepredictionsaggregator import (
     AveragePredictionsAggregator,
 )
+from ..tagging.tags import UserInputMoods, UserInputGenres
 
 
 @bot.command(name="dalang")
@@ -182,7 +183,6 @@ async def youtube_to_cyanite_tags(
     await ctx.send({"genres": genres, "moods": moods})
     return genres, moods
 
-
 @bot.command()
 async def recommend(ctx, num_of_songs=2):
     guild = ctx.guild.name
@@ -230,14 +230,40 @@ async def recommend(ctx, num_of_songs=2):
         for index in range(min(num_of_songs, 10)):
             track = SpotifyIDCrawler().get_track_by_id(spotify_ids[index])
             if track["external_urls"]:
-                await ctx.channel.send(
+              await ctx.channel.send(
                     f"{list(track['external_urls'].values())[0]}"
                 )
-    else:
-        await ctx.channel.send("No spotify ids found")
+
+            else:
+              await ctx.channel.send("No spotify ids found")
 
 
-# try select box - but is not working
 @bot.command()
-async def flavor(ctx):
-    await ctx.send("Choose a flavor!", view=MoodSelectView())
+async def input_genre_and_mood(ctx, arg1=None, arg2=None):
+    if arg1 == 'help':
+        await ctx.send(f'''You can specify genre and mood: \n 
+        genres: {UserInputGenres.to_list()}
+        moods: {UserInputMoods.to_list()}
+        example with both genre and mood: /youtube_to_cyanite_tags_with_args ambient epic\n 
+        example with both genre : /youtube_to_cyanite_tags_with_args ambient -\n 
+        example with both mood: /youtube_to_cyanite_tags_with_args - epic
+        ''')
+    elif not (arg1 and arg2):
+        await ctx.send(f'''You can specify genre and mood: \n 
+        genres: {UserInputGenres.to_list()}
+        moods: {UserInputMoods.to_list()}
+        example with both genre and mood: /youtube_to_cyanite_tags_with_args ambient epic\n 
+        example with both genre : /youtube_to_cyanite_tags_with_args ambient -\n 
+        example with both mood: /youtube_to_cyanite_tags_with_args - epic
+        ''')
+    elif arg2 == '-':
+       genre = arg1
+       await ctx.send("run business logic with genre")
+    elif arg1 == '-':
+        mood = arg2
+        await ctx.send("run business logic with mood")
+    elif arg1 and arg2:
+        genre = arg1
+        mood = arg2
+        await ctx.send("run business logic with genre and mood")
+              
