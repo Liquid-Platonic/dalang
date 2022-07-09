@@ -10,7 +10,7 @@ from dalang.postprocessing.averagepredictionsaggregator import (
 )
 
 
-def youtube_to_genre_mood(
+async def youtube_to_genre_mood(
     text_channels: [TextChannel], window_minutes: int = 5
 ):
     yt_titles = await fetch_youtube_links_from_channel(
