@@ -20,6 +20,7 @@ class Cyanite:
         results = {"genres": [], "moods": []}
         for spotify_id in spotify_ids:
             genre, mood = self.cyanite_api.get_moods_and_genres(spotify_id)
-            results["genres"].append(self.cyanite_genre_mapper.map(genre))
-            results["moods"].append(mood)
+            if genre and mood:
+                results["genres"].append(self.cyanite_genre_mapper.map(genre))
+                results["moods"].append(mood)
         return results
