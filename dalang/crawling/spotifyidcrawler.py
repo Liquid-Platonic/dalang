@@ -18,3 +18,9 @@ class SpotifyIDCrawler(SpotifyCrawler, metaclass=Singleton):
 
     def _search_query(self, query: str) -> List[str]:
         return self.spotify_connection().search(query)
+
+    def _search_id(self, id: int) -> List[str]:
+        return self.spotify_connection().track(id)
+
+    def get_track_by_id(self, id):
+        return self._search_id(id)
