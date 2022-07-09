@@ -1,3 +1,5 @@
+import re
+from typing import List
 import asyncio
 import re
 from collections import defaultdict
@@ -16,6 +18,14 @@ from dalang.discordbot.fetch_youtube_links_from_channel import (
     fetch_youtube_links_from_channel,
 )
 from dalang.discordbot.mood_collector import mood_collector
+from dalang.discordbot.prepare_channel_messages_for_text_to_mood import (
+    prepare_channel_messages_for_text_to_mood,
+)
+from dalang.discordbot.save_recordings import save_recordings
+from dalang.models import text_to_mood_model
+from dalang.postprocessing.averagepredictionsaggregator import (
+    AveragePredictionsAggregator,
+
 from dalang.discordbot.save_recordings import (
     find_mood_from_recordings,
     save_recordings,
@@ -132,6 +142,18 @@ async def messages(ctx):
     }
     """
     return channel_messages
+
+
+@bot.command()
+async def messages_to_mood(ctx, *channel_names):
+    # channel_names = *channel_names
+    model_inputs = await prepare_channel_messages_for_text_to_mood(
+        ctx, channel_names
+    )
+    prediction = text_to_mood_model.predict(model_inputs)
+    # predictions = text_to_mood_model.predict_batch(model_inputs)
+    # prediction = AveragePredictionsAggregator.aggregate(predictions)
+    await ctx.send(f"Prediction: {prediction}")
 
 
 @bot.command()
