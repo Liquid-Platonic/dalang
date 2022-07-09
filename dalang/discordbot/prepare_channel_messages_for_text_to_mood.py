@@ -20,7 +20,7 @@ async def prepare_channel_messages_for_text_to_mood(ctx, channel_names):
             if text_channel.name in channel_names
         ]
     if not text_channels:
-        return await ctx.channel.send(f"Channel {channel_name} not found")
+        return await ctx.channel.send(f"Channel not found")
 
     for text_channel in text_channels:
         channel_name = text_channel.name

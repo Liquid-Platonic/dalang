@@ -61,11 +61,17 @@ class CyaniteApi:
         return results["genre"], results["mood"]
 
     @staticmethod
-    def _convert_keywords_to_str(keywords: TagPredictions) -> str:
+    def _convert_keywords_to_str(
+        keywords: TagPredictions, MAX_KEYWORDS=7
+    ) -> str:
         #  keyword: "sad", weight: 1
+        keywords_added = 0
         keywords_str = "[\n"
         for name, weight in keywords.items():
+            if keywords_added > MAX_KEYWORDS:
+                break
             keywords_str += f'{{keyword: "{name}", weight: {weight}}} \n'
+            keywords_added += 1
         keywords_str += "]"
         return keywords_str
 

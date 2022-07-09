@@ -5,15 +5,19 @@ from operator import itemgetter
 from typing import Dict, List
 
 
-def get_top_dict_items(dict: Dict, n=5) -> List:
+def get_top_dict_items(dictionary: Dict, n=5) -> Dict:
     """This can be used to take the top n tags from a given tag prediction."""
-    return dict(sorted(dict.items(), key=itemgetter(1), reverse=True)[:n])
+    return dict(
+        sorted(dictionary.items(), key=itemgetter(1), reverse=True)[:n]
+    )
 
 
 def merge_list_of_dicts_by_average(
     dict_list: List[Dict[str, float]]
 ) -> Dict[str, float]:
     """This can be used to average the scores across multiple tag predictions."""
+    if not dict_list:
+        return {}
     aggregated_dict_keys = dict(
         functools.reduce(operator.add, map(collections.Counter, dict_list))
     )

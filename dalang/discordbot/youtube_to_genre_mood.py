@@ -19,6 +19,8 @@ async def youtube_to_genre_mood(
         text_channels, window_minutes=window_minutes
     )
     spotify_ids = spotify_id_crawler.get_ids_by_titles(yt_titles)
+    if not spotify_ids:
+        return {}, {}, []
     cyanite_tags = cyanite_model.predict(spotify_ids)
 
     genres = {}
