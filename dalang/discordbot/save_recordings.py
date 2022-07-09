@@ -4,8 +4,7 @@ from pathlib import Path
 import discord
 from discord.sinks import Sink
 
-from dalang.models.distilbert import text_to_mood_model
-from dalang.models.speech2text import speech_to_text_model
+from dalang.models import speech_to_mood_model, text_to_mood_model
 
 
 async def save_recordings(
@@ -52,12 +51,11 @@ async def find_mood_from_recordings(
     #     for file in filepaths
     # ]
     texts = [
-        speech_to_text_model.predict(Path(file).absolute())
+        speech_to_mood_model.predict(Path(file).absolute())
         for file in filepaths
     ]
     predictions = [
-        text_to_mood_model.predict(' '.join(text))
-        for text in texts
+        text_to_mood_model.predict(" ".join(text)) for text in texts
     ]
 
     for index, prediction in enumerate(predictions):
