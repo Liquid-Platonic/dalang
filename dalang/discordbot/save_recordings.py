@@ -5,6 +5,8 @@ import discord
 from discord.sinks import Sink
 
 from dalang.models import speech_to_mood_model, text_to_mood_model
+from dalang.discordbot.mood_collector import mood_collector
+
 
 
 async def save_recordings(
@@ -25,9 +27,15 @@ async def save_recordings(
 
 
 async def find_mood_from_recordings(
-    sink: Sink, channel: discord.TextChannel, *args
+    sink: Sink,
+    channel: discord.TextChannel,
+    guild_name,
+    write_output=True,
+    *args,
 ):  # Our voice client already passes these in.
-    await channel.send("Processing recordings' mood...")
+    if write_output:
+        await channel.send("Processing recordings' mood...")
+
     user_recorded = [  # A list of recorded users
         f"<@{user_id}>" for user_id, audio in sink.audio_data.items()
     ]
@@ -46,26 +54,26 @@ async def find_mood_from_recordings(
 
         filepaths.append(filename)
 
-    # predictions = [
-    #     speech_to_mood_model.predict(Path(file).absolute())
-    #     for file in filepaths
-    # ]
-    texts = [
+    predictions = [
         speech_to_mood_model.predict(Path(file).absolute())
         for file in filepaths
     ]
-    predictions = [
-        text_to_mood_model.predict(" ".join(text)) for text in texts
-    ]
 
-    for index, prediction in enumerate(predictions):
-        feeling = max(
-            [
-                {"mood": key, "value": value}
-                for key, value in prediction.items()
-            ],
-            key=lambda x: x["value"],
-        )
-        await channel.send(
-            f"Prediction for <{user_recorded[index]}> :{feeling}\n Text: {texts[index]}"
-        )
+    payload = {
+        user_id: predictions[index]
+        for index, (user_id, _) in enumerate(sink.audio_data.items())
+    }
+    mood_collector.add(payload, guild_name)
+
+    if write_output:
+        for index, prediction in enumerate(predictions):
+            feeling = max(
+                [
+                    {"mood": key, "value": value}
+                    for key, value in prediction.items()
+                ],
+                key=lambda x: x["value"],
+            )
+            await channel.send(
+                f"Prediction for <{user_recorded[index]}>: {feeling}"
+            )
