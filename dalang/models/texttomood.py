@@ -25,6 +25,15 @@ class Text2Mood(HuggingFaceModel):
         prediction = self._convert_list_of_dicts_to_dict(prediction)
         return self.tag_mapper.map(prediction)
 
+    def predict_batch(self, texts: List[str]) -> List[TagPredictions]:
+        output = []
+        for text in texts:
+            try:
+                output.append(self.predict(text))
+            except:
+                pass
+        return output
+
     @staticmethod
     def _convert_list_of_dicts_to_dict(
             list_of_dicts: List[Dict[str, float]]
