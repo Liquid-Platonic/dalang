@@ -15,7 +15,6 @@ pre-commit = "2.19.0"
 rmn = "3.0.4"
 syrupy = "2.3.0"
 sentencepiece = "^0.1.96"
-speechbrain = "0.5.12"
 spotipy = "^2.20.0"
 python-dotenv = "^0.20.0"
 pyngrok = "^5.1.0"
@@ -23,6 +22,7 @@ PyNaCl = "^1.4.0"
 py-cord = {version = "2.0.0rc1", extras = ["voice"]}
 youtube_dl = "^2021.12.17"
 audiofile = "^1.1.0"
+speechbrain = "^0.5.12"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"

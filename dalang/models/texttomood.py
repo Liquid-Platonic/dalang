@@ -9,7 +9,7 @@ from dalang.tagging.distilberttokeywordsmapper import (
 )
 
 
-class Distilbert(HuggingFaceModel):
+class Text2Mood(HuggingFaceModel):
     def __init__(self, tag_mapper: DistilbertToKeywordsMapper) -> None:
         super().__init__(tag_mapper)
 

@@ -12,7 +12,7 @@ from dalang.tagging.speechbraintokeywordsmapper import (
 from dalang.tagging.tags import SpeechbrainMoods
 
 
-class Speechbrain(HuggingFaceModel):
+class SpeechToMood(HuggingFaceModel):
     def __init__(self, tag_mapper: SpeechbrainToKeywordsMapper):
         super().__init__(tag_mapper)
 
