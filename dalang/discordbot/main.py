@@ -1,3 +1,4 @@
+from discord import Message
 from dotenv import load_dotenv
 
 import dalang.config.configs as config
@@ -15,8 +16,8 @@ async def on_ready():
 
 
 @bot.event
-async def on_message(message):
-    message_db(message.guild.name).add(message)
+async def on_message(message: Message):
+    message_db(message.guild).add(message)
 
 
 bot.run(config.DISCORD_TOKEN)
