@@ -30,6 +30,8 @@ async def save_recordings(
 
 
 def find_dominant_mood(prediction):
+    if not prediction:
+        return None
     feeling = max(
         [{"mood": key, "value": value} for key, value in prediction.items()],
         key=lambda x: x["value"],

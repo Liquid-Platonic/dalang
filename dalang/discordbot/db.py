@@ -13,6 +13,7 @@ from dalang.discordbot.fetch_messages_from_channel import (
 from dalang.discordbot.fetch_youtube_links_from_channel import (
     fetch_title_from_link,
 )
+from dalang.discordbot.save_recordings import find_dominant_mood
 from dalang.discordbot.youtube_to_genre_mood import get_mood_from_link
 from dalang.models import text_to_mood_model
 from dalang.postprocessing.averagepredictionsaggregator import (
@@ -291,8 +292,14 @@ class MessageDB:
     async def on_channel_update(
         self, channel: TextChannel, c_mood, c_genre, p_mood, p_genre
     ):
-        if channel and c_mood != p_mood:
-            # await channel.send(f"Channel mood was changed from {p_mood} to {c_mood}")
+        dm = find_dominant_mood(c_mood) or {}
+        dominant_mood = dm.get("mood", None)
+        pm = find_dominant_mood(p_mood) or {}
+        p_dominant_mood = pm.get("mood", None)
+        if channel and dominant_mood != p_dominant_mood:
+            await channel.send(
+                f"Channel `{channel.name}` mood was changed from {p_dominant_mood} to {dominant_mood}"
+            )
             return
         else:
             return

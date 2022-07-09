@@ -1,3 +1,4 @@
+from collections import defaultdict
 from typing import List
 
 from dalang.helpers import merge_dicts, merge_list_of_dicts_by_average
@@ -20,17 +21,18 @@ class AveragePredictionsAggregator(PredictionsAggregator):
             return None
 
         total_weights = 0
-
+        sum_vector = defaultdict(float)
         for index, prediction in enumerate(predictions):
             weight = 1000 - index * 10
             if weight < 0:
                 weight = 0.0
             total_weights += weight
-            prediction.update((x, y * weight) for x, y in prediction.items())
 
-        for prediction in predictions:
-            prediction.update(
-                (x, y / total_weights) for x, y in prediction.items()
-            )
+            for x, y in prediction.items():
+                sum_vector[x] += y * weight
 
-        return merge_list_of_dicts_by_average(predictions)
+        sum_vector.update(
+            (x, y / total_weights) for x, y in sum_vector.items()
+        )
+
+        return sum_vector
