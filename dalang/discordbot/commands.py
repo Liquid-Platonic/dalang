@@ -3,12 +3,10 @@ import re
 from collections import defaultdict
 from typing import List, Optional
 
-import discord
 from discord.sinks import MP3Sink, WaveSink
-from youtube_dl import YoutubeDL
 
 from dalang.apis.cyaniteapi import CyaniteApi
-from dalang.crawling import SpotifyIDCrawler, spotify_id_crawler
+from dalang.crawling import SpotifyIDCrawler
 from dalang.discordbot.client import bot, find_voice_client
 from dalang.discordbot.fetch_messages_from_channel import (
     fetch_messages_from_channel,
@@ -25,6 +23,7 @@ from dalang.discordbot.save_recordings import (
     find_mood_from_recordings,
     save_recordings,
 )
+from dalang.discordbot.views import MoodSelectView
 from dalang.discordbot.youtube_to_genre_mood import youtube_to_genre_mood
 from dalang.helpers import get_top_dict_items, merge_dicts
 from dalang.models import cyanite_model, text_to_mood_model
@@ -236,3 +235,9 @@ async def recommend(ctx, num_of_songs=2):
                 )
     else:
         await ctx.channel.send("No spotify ids found")
+
+
+# try select box - but is not working
+@bot.command()
+async def flavor(ctx):
+    await ctx.send("Choose a flavor!", view=MoodSelectView())

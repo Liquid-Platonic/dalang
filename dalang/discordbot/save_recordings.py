@@ -5,7 +5,11 @@ import discord
 from discord.sinks import Sink
 
 from dalang.discordbot.mood_collector import mood_collector
-from dalang.models import speech_to_mood_model, text_to_mood_model
+from dalang.discordbot.views import ButtonView
+from dalang.models import speech_to_mood_model
+from dalang.postprocessing.averagepredictionsaggregator import (
+    AveragePredictionsAggregator,
+)
 
 
 async def save_recordings(
@@ -23,6 +27,14 @@ async def save_recordings(
         f"Finished recording audio for: {', '.join(user_recorded)}.",
         files=files,
     )  # Send a message with the accumulated files.
+
+
+def find_dominant_mood(prediction):
+    feeling = max(
+        [{"mood": key, "value": value} for key, value in prediction.items()],
+        key=lambda x: x["value"],
+    )
+    return feeling
 
 
 async def find_mood_from_recordings(
@@ -62,17 +74,32 @@ async def find_mood_from_recordings(
         user_id: predictions[index]
         for index, (user_id, _) in enumerate(sink.audio_data.items())
     }
-    mood_collector.add(payload, guild_name)
+
+    avg_aggregator = AveragePredictionsAggregator()
+    average_mood = (
+        avg_aggregator.aggregate(predictions) if predictions else None
+    )
+    new_dominant_mood = (
+        find_dominant_mood(average_mood) if average_mood else {}
+    )
+    speech_moods = mood_collector.get(guild_name)
+    old_dominant_mood = {}
+    if speech_moods:
+        old_average_mood = avg_aggregator.aggregate(
+            [mood_vector for user, mood_vector in speech_moods[0].items()]
+        )
+        old_dominant_mood = find_dominant_mood(old_average_mood)
+    old_mood = old_dominant_mood.get("mood", None)
+    new_mood = new_dominant_mood.get("mood", None)
+    if old_mood != new_mood:
+        await channel.send(
+            f"Channel mood changed from `{old_mood}` to `{new_mood}`, write /recommend to vibe on your mood! 😎",
+        )
+        mood_collector.add(payload, guild_name)
 
     if write_output:
         for index, prediction in enumerate(predictions):
-            feeling = max(
-                [
-                    {"mood": key, "value": value}
-                    for key, value in prediction.items()
-                ],
-                key=lambda x: x["value"],
-            )
+            feeling = find_dominant_mood(prediction)
             await channel.send(
                 f"Prediction for <{user_recorded[index]}>: {feeling}"
             )
