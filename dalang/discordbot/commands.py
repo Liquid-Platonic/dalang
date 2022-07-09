@@ -3,19 +3,19 @@ import re
 from collections import defaultdict
 from typing import List, Optional
 
-import discord
 from discord.sinks import MP3Sink, WaveSink
-from youtube_dl import YoutubeDL
 
 from dalang.apis.cyaniteapi import CyaniteApi
-from dalang.crawling import SpotifyIDCrawler, spotify_id_crawler
+from dalang.crawling import SpotifyIDCrawler
 from dalang.discordbot.client import bot, find_voice_client
+from dalang.discordbot.db import message_db
 from dalang.discordbot.fetch_messages_from_channel import (
     fetch_messages_from_channel,
 )
 from dalang.discordbot.fetch_youtube_links_from_channel import (
     fetch_youtube_links_from_channel,
 )
+from dalang.discordbot.helpers import batch_string
 from dalang.discordbot.mood_collector import mood_collector
 from dalang.discordbot.prepare_channel_messages_for_text_to_mood import (
     prepare_channel_messages_for_text_to_mood,
@@ -24,8 +24,9 @@ from dalang.discordbot.save_recordings import (
     find_mood_from_recordings,
     save_recordings,
 )
+from dalang.discordbot.views import MoodSelectView
 from dalang.discordbot.youtube_to_genre_mood import youtube_to_genre_mood
-from dalang.helpers import merge_dicts
+from dalang.helpers import get_top_dict_items, merge_dicts
 from dalang.models import cyanite_model, text_to_mood_model
 from dalang.postprocessing.averagepredictionsaggregator import (
     AveragePredictionsAggregator,
@@ -170,6 +171,7 @@ async def youtube_to_cyanite_tags(
     text_channel: Optional[str] = None,
     window_minutes: Optional[int] = None,
 ):
+    return
     text_channels = ctx.guild.text_channels
     if text_channel:
         text_channels = [tc for tc in text_channels if tc.name == text_channel]
@@ -190,36 +192,51 @@ async def recommend(ctx, num_of_songs=2):
         await ctx.send("Need to monitor before recommending")
         return
 
-    text_channels = ctx.guild.text_channels
-    links_genre_predictions, links_mood_predictions, _ = youtube_to_genre_mood(
-        text_channels, 10
-    )
+    voice_client = find_voice_client(ctx.guild)
+    if voice_client:
+        voice_client.stop_recording()
 
-    model_inputs = await prepare_channel_messages_for_text_to_mood(ctx)
-    text_prediction = text_to_mood_model.predict(model_inputs)
+    mess_db = message_db(ctx.guild)
+    messages = mess_db.messages[guild]
+    links = mess_db.links[guild]
+
+    links_genre_predictions = links.genre
+
+    links_mood_predictions = links.mood
+    text_moods_predictions = messages.mood
 
     last_speech_mood = speech_moods[0]
     average_aggregator = AveragePredictionsAggregator()
-    average_mood = average_aggregator.aggregate(
+    speech_mood = average_aggregator.aggregate(
         [mood_vector for user, mood_vector in last_speech_mood.items()]
     )
 
     average_mood_with_text_and_links = average_aggregator.aggregate(
-        [average_mood, text_prediction, links_mood_predictions]
+        [speech_mood, messages.mood, links.mood or {}]
     )
     keywords = merge_dicts(
-        average_mood_with_text_and_links, links_genre_predictions
+        [
+            get_top_dict_items(average_mood_with_text_and_links, 4),
+            get_top_dict_items(links_genre_predictions, 3),
+        ]
     )
     spotify_ids = CyaniteApi().get_spotify_ids_by_keywords(keywords)
 
-    await ctx.send(average_mood_with_text_and_links)
+    await ctx.channel.send("Sending keywords")
+    await ctx.channel.send(str(keywords))
 
     # print track links
     if spotify_ids:
         for index in range(min(num_of_songs, 10)):
             track = SpotifyIDCrawler().get_track_by_id(spotify_ids[index])
             if track["external_urls"]:
-                await ctx.send(f"{list(track['external_urls'].values())[0]}")
+              await ctx.channel.send(
+                    f"{list(track['external_urls'].values())[0]}"
+                )
+
+            else:
+              await ctx.channel.send("No spotify ids found")
+
 
 @bot.command()
 async def input_genre_and_mood(ctx, arg1=None, arg2=None):
@@ -249,3 +266,4 @@ async def input_genre_and_mood(ctx, arg1=None, arg2=None):
         genre = arg1
         mood = arg2
         await ctx.send("run business logic with genre and mood")
+              
