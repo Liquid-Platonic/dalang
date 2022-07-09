@@ -8,4 +8,8 @@ from dalang.tagging import TagPredictions
 class AveragePredictionsAggregator(PredictionsAggregator):
     @staticmethod
     def aggregate(predictions: List[TagPredictions]) -> TagPredictions:
-        return merge_list_of_dicts_by_average(predictions)
+        return (
+            merge_list_of_dicts_by_average(predictions)
+            if predictions
+            else None
+        )
