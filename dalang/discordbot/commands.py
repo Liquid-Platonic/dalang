@@ -186,11 +186,14 @@ async def youtube_to_cyanite_tags(
 @bot.command()
 async def recommend(ctx, num_of_songs=2):
     guild = ctx.guild.name
-
     speech_moods = mood_collector.get(guild)
     if not speech_moods:
         await ctx.send("Need to monitor before recommending")
         return
+
+    voice_client = find_voice_client(ctx.guild)
+    if voice_client:
+        voice_client.stop_recording()
 
     text_channels = ctx.guild.text_channels
     (
@@ -210,7 +213,7 @@ async def recommend(ctx, num_of_songs=2):
         [mood_vector for user, mood_vector in last_speech_mood.items()]
     )
     average_mood_with_text_and_links = average_aggregator.aggregate(
-        [average_mood, *text_predictions, links_mood_predictions]
+        [average_mood, *text_predictions, links_mood_predictions or {}]
     )
     keywords = merge_dicts(
         [
@@ -220,11 +223,16 @@ async def recommend(ctx, num_of_songs=2):
     )
     spotify_ids = CyaniteApi().get_spotify_ids_by_keywords(keywords)
 
-    await ctx.send(keywords)
+    await ctx.channel.send("Sending keywords")
+    await ctx.channel.send(str(keywords))
 
     # print track links
     if spotify_ids:
         for index in range(min(num_of_songs, 10)):
             track = SpotifyIDCrawler().get_track_by_id(spotify_ids[index])
             if track["external_urls"]:
-                await ctx.send(f"{list(track['external_urls'].values())[0]}")
+                await ctx.channel.send(
+                    f"{list(track['external_urls'].values())[0]}"
+                )
+    else:
+        await ctx.channel.send("No spotify ids found")

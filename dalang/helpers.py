@@ -16,6 +16,8 @@ def merge_list_of_dicts_by_average(
     dict_list: List[Dict[str, float]]
 ) -> Dict[str, float]:
     """This can be used to average the scores across multiple tag predictions."""
+    if not dict_list:
+        return {}
     aggregated_dict_keys = dict(
         functools.reduce(operator.add, map(collections.Counter, dict_list))
     )
