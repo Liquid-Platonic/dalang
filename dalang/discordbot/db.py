@@ -211,7 +211,9 @@ class MessageDB:
         ].channels.items():
             did_message_changed = False
             for message in channel.messages:
-                if not (message.mood or not message.genre) and message.found:
+                if (
+                    not message.mood or not message.genre
+                ) and not message.found:
                     genre, mood, spotify_id, found = self._calculate_link_mood(
                         message.message.content
                     )

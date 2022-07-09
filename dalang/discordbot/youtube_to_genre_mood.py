@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Tuple
 
 from discord import TextChannel
 
@@ -16,9 +16,9 @@ from dalang.tagging import TagPredictions
 
 def get_mood_from_link(
     link: str,
-) -> (TagPredictions, TagPredictions, list, bool):
+) -> Tuple[TagPredictions, TagPredictions, list, bool]:
     title = fetch_title_from_link(link)
-    spotify_ids = spotify_id_crawler.get_id_by_title(title)
+    spotify_ids = [spotify_id_crawler.get_id_by_title(title)]
     if not spotify_ids:
         return {}, {}, [], False
     cyanite_tags = cyanite_model.predict(spotify_ids)

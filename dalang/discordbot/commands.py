@@ -8,6 +8,7 @@ from discord.sinks import MP3Sink, WaveSink
 from dalang.apis.cyaniteapi import CyaniteApi
 from dalang.crawling import SpotifyIDCrawler
 from dalang.discordbot.client import bot, find_voice_client
+from dalang.discordbot.db import message_db
 from dalang.discordbot.fetch_messages_from_channel import (
     fetch_messages_from_channel,
 )
@@ -185,6 +186,7 @@ async def youtube_to_cyanite_tags(
 @bot.command()
 async def recommend(ctx, num_of_songs=2):
     guild = ctx.guild.name
+
     speech_moods = mood_collector.get(guild)
     if not speech_moods:
         await ctx.send("Need to monitor before recommending")
@@ -194,25 +196,23 @@ async def recommend(ctx, num_of_songs=2):
     if voice_client:
         voice_client.stop_recording()
 
-    text_channels = ctx.guild.text_channels
-    (
-        links_genre_predictions,
-        links_mood_predictions,
-        _,
-    ) = await youtube_to_genre_mood(text_channels, 10)
+    mess_db = message_db(ctx.guild)
+    messages = mess_db.messages[guild]
+    links = mess_db.links[guild]
 
-    model_inputs = await prepare_channel_messages_for_text_to_mood(ctx, [])
-    text_predictions = text_to_mood_model.predict_batch(
-        batch_string(model_inputs, 512)
-    )
+    links_genre_predictions = links.genre
+
+    links_mood_predictions = links.mood
+    text_moods_predictions = messages.mood
 
     last_speech_mood = speech_moods[0]
     average_aggregator = AveragePredictionsAggregator()
-    average_mood = average_aggregator.aggregate(
+    speech_mood = average_aggregator.aggregate(
         [mood_vector for user, mood_vector in last_speech_mood.items()]
     )
+
     average_mood_with_text_and_links = average_aggregator.aggregate(
-        [average_mood, *text_predictions, links_mood_predictions or {}]
+        [speech_mood, messages.mood, links.mood or {}]
     )
     keywords = merge_dicts(
         [
