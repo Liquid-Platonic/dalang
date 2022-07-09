@@ -4,9 +4,8 @@ from pathlib import Path
 import discord
 from discord.sinks import Sink
 
-from dalang.models import speech_to_mood_model, text_to_mood_model
 from dalang.discordbot.mood_collector import mood_collector
-
+from dalang.models import speech_to_mood_model, text_to_mood_model
 
 
 async def save_recordings(

@@ -53,4 +53,3 @@ def clean_string(string):
         if w.lower() in english_words or not w.isalpha()
     )
     return re.sub(emoji_pattern, "", string)
-    

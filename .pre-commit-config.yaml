@@ -5,7 +5,7 @@ repos:
     hooks:
       - id: poetry
         name: poetry
-        entry: poetry update
+        entry: poetry install
         language: system
         types: [file, python]
         pass_filenames: false

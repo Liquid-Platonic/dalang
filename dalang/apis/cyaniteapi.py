@@ -53,7 +53,8 @@ class CyaniteApi:
         }}
         """
         results = self._query_and_get_results(query)["data"]["spotifyTrack"][
-            "audioAnalysisV6"]
+            "audioAnalysisV6"
+        ]
         if "result" not in results:
             return [], []
         results = results["result"]
