@@ -52,6 +52,8 @@ class MessageDB:
     messages: Dict[str, DalangGuild] = {}
     links: Dict[str, DalangGuild] = {}
     guild: Guild = None
+    user_mood: str = None
+    user_genre: str = None
 
     def __init__(self, guild: Guild):
         self.guild = guild
@@ -303,6 +305,12 @@ class MessageDB:
             return
         else:
             return
+
+    def set_mood(self, mood):
+        self.user_mood = mood
+
+    def set_genre(self, genre):
+        self.user_genre = genre
 
 
 dbs = {}

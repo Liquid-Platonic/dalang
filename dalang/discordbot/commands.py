@@ -31,7 +31,8 @@ from dalang.models import cyanite_model, text_to_mood_model
 from dalang.postprocessing.averagepredictionsaggregator import (
     AveragePredictionsAggregator,
 )
-from ..tagging.tags import UserInputMoods, UserInputGenres
+
+from ..tagging.tags import UserInputGenres, UserInputMoods
 
 
 @bot.command(name="dalang")
@@ -183,6 +184,7 @@ async def youtube_to_cyanite_tags(
     await ctx.send({"genres": genres, "moods": moods})
     return genres, moods
 
+
 @bot.command()
 async def recommend(ctx, num_of_songs=2):
     guild = ctx.guild.name
@@ -230,40 +232,48 @@ async def recommend(ctx, num_of_songs=2):
         for index in range(min(num_of_songs, 10)):
             track = SpotifyIDCrawler().get_track_by_id(spotify_ids[index])
             if track["external_urls"]:
-              await ctx.channel.send(
+                await ctx.channel.send(
                     f"{list(track['external_urls'].values())[0]}"
                 )
 
             else:
-              await ctx.channel.send("No spotify ids found")
+                await ctx.channel.send("No spotify ids found")
 
 
 @bot.command()
-async def input_genre_and_mood(ctx, arg1=None, arg2=None):
-    if arg1 == 'help':
-        await ctx.send(f'''You can specify genre and mood: \n 
+async def set_genre_mood(ctx, arg1=None, arg2=None):
+    genre = None
+    mood = None
+    if arg1 == "help":
+        await ctx.send(
+            f"""You can specify genre and mood: \n 
         genres: {UserInputGenres.to_list()}
         moods: {UserInputMoods.to_list()}
-        example with both genre and mood: /youtube_to_cyanite_tags_with_args ambient epic\n 
-        example with both genre : /youtube_to_cyanite_tags_with_args ambient -\n 
-        example with both mood: /youtube_to_cyanite_tags_with_args - epic
-        ''')
+        example with both genre and mood: /set_genre_mood ambient epic\n 
+        example with both genre : /set_genre_mood ambient -\n 
+        example with both mood: /set_genre_mood - epic
+        """
+        )
     elif not (arg1 and arg2):
-        await ctx.send(f'''You can specify genre and mood: \n 
+        await ctx.send(
+            f"""You can specify genre and mood: \n 
         genres: {UserInputGenres.to_list()}
         moods: {UserInputMoods.to_list()}
-        example with both genre and mood: /youtube_to_cyanite_tags_with_args ambient epic\n 
-        example with both genre : /youtube_to_cyanite_tags_with_args ambient -\n 
-        example with both mood: /youtube_to_cyanite_tags_with_args - epic
-        ''')
-    elif arg2 == '-':
-       genre = arg1
-       await ctx.send("run business logic with genre")
-    elif arg1 == '-':
+        example with both genre and mood: /set_genre_mood ambient epic\n 
+        example with both genre : /set_genre_mood ambient -\n 
+        example with both mood: /set_genre_mood - epic
+        """
+        )
+    elif arg2 == "-":
+        genre = arg1
+        await ctx.send("run business logic with genre")
+    elif arg1 == "-":
         mood = arg2
         await ctx.send("run business logic with mood")
     elif arg1 and arg2:
         genre = arg1
         mood = arg2
         await ctx.send("run business logic with genre and mood")
-              
+
+    message_db(ctx.guild).set_genre(genre)
+    message_db(ctx.guild).set_mood(mood)

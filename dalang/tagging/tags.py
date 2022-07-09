@@ -49,6 +49,7 @@ class DistilbertMoods(ExtendedEnum):
     fear = auto()
     surprise = auto()
 
+
 class UserInputMoods(ExtendedEnum):
     aggressive = auto()
     calm = auto()
@@ -70,17 +71,17 @@ class UserInputMoods(ExtendedEnum):
     fear = auto()
     shock = auto()
 
+
 class UserInputGenres(Enum):
-    ambient = 'ambient'
-    blues = 'blues'
-    classical = 'classical'
-    dance_electronica = 'dance electronica'
-    folk_country = 'folk country'
-    jazz = 'jazz'
-    soul_funk = 'soul funk'
-    latin = 'latin'
+    ambient = "ambient"
+    blues = "blues"
+    classical = "classical"
+    dance_electronica = "dance electronica"
+    folk_country = "folk country"
+    jazz = "jazz"
+    soul_funk = "soul funk"
+    latin = "latin"
 
     @classmethod
     def to_list(cls):
         return [item.value for item in cls]
-
