@@ -39,6 +39,3 @@ class Text2Mood(HuggingFaceModel):
         list_of_dicts: List[Dict[str, float]]
     ) -> TagPredictions:
         return {dict_["label"]: dict_["score"] for dict_ in list_of_dicts}
-
-
-text_to_mood_model = Text2Mood(DistilbertToKeywordsMapper())
