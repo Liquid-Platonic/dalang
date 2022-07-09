@@ -13,7 +13,7 @@ from dalang.tagging.tags import SpeechbrainMoods
 
 
 class Speechbrain(HuggingFaceModel):
-    def __init__(self, tag_mapper: SpeechbrainToKeywordsMapper):
+    def __init__(self, tag_mapper: SpeechbrainToKeywordsMapper = SpeechbrainToKeywordsMapper()):
         super().__init__(tag_mapper)
 
     def _get_raw_model(self) -> None:
@@ -24,16 +24,12 @@ class Speechbrain(HuggingFaceModel):
         )
 
     def predict(self, audio_path: Path) -> TagPredictions:
-        predictions, _, _, _ = self.raw_model.classify_file(
-            audio_path.as_posix()
-        )
+        predictions, _, _, _ = self.raw_model.classify_file(audio_path.as_posix())
         predictions = self._convert_torch_tensor_to_tag_prediction(predictions)
         return self.tag_mapper.map(predictions)
 
     def predict_batch(self, audio_paths: List[Path]) -> List[TagPredictions]:
         return [self.predict(audio_path) for audio_path in audio_paths]
 
-    def _convert_torch_tensor_to_tag_prediction(
-        self, tensor: torch.Tensor
-    ) -> TagPredictions:
+    def _convert_torch_tensor_to_tag_prediction(self, tensor: torch.Tensor) -> TagPredictions:
         return dict(zip(SpeechbrainMoods.to_list(), tensor[0].tolist()))
