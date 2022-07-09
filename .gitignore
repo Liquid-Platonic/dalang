@@ -154,4 +154,5 @@ deploy.prototxt.txt
 pretrained_ckpt
 musicorchestrator/images/temp/
 wav2vec_checkpoints/*
+wav2vec2_checkpoints/*
 pretrained_models/**/*
