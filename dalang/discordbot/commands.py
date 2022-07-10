@@ -216,24 +216,15 @@ async def recommend(ctx, num_of_songs=2):
         [speech_mood, messages.mood, links.mood or {}]
     )
 
-    if mess_db.user_genre not in links.genre:
-        links.genre[mess_db.user_genre] = 0
-
-    links_genre_predictions = merge_list_of_dicts_by_average(
-        [{mess_db.user_genre: 1.0}, links.genre]
-    )
-
-    if mess_db.user_mood not in average_mood_with_text_and_links:
-        average_mood_with_text_and_links[mess_db.user_mood] = 0
-
-    average_mood_with_text_and_links = merge_list_of_dicts_by_average(
-        [{mess_db.user_mood: 1.0}, average_mood_with_text_and_links]
-    )
+    if mess_db.user_genre:
+        links.genre[mess_db.user_genre] = 1.0
+    if mess_db.user_mood:
+        average_mood_with_text_and_links[mess_db.user_mood] = 1.0
 
     keywords = merge_dicts(
         [
             get_top_dict_items(average_mood_with_text_and_links, 4),
-            get_top_dict_items(links_genre_predictions, 3),
+            get_top_dict_items(links.genre, 3),
         ]
     )
     spotify_ids = CyaniteApi().get_spotify_ids_by_keywords(keywords)
@@ -280,13 +271,13 @@ async def input_genre_and_mood(ctx, arg1=None, arg2=None):
         )
     elif arg2 == "-":
         genre = arg1
+        mood = None
     elif arg1 == "-":
+        genre = None
         mood = arg2
     elif arg1 and arg2:
         genre = arg1
         mood = arg2
-    if genre:
-        message_db(ctx.guild).set_genre(genre)
-    if mood:
-        message_db(ctx.guild).set_mood(mood)
+    message_db(ctx.guild).set_genre(genre)
+    message_db(ctx.guild).set_mood(mood)
     await ctx.send(f"Run bussines logic with genre:{genre}, mood:{mood}")
