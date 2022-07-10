@@ -1,4 +1,5 @@
 import asyncio
+import pprint
 import re
 from collections import defaultdict
 from typing import List, Optional
@@ -27,6 +28,7 @@ from dalang.discordbot.save_recordings import (
 from dalang.discordbot.views import MoodSelectView
 from dalang.discordbot.youtube_to_genre_mood import youtube_to_genre_mood
 from dalang.helpers import (
+    get_sorted_dict_str,
     get_top_dict_items,
     merge_dicts,
     merge_list_of_dicts_by_average,
@@ -80,7 +82,7 @@ async def monitor(ctx):
         await ctx.invoke(bot.get_command("dalang"))
         voice_client = find_voice_client(ctx.guild)
     if not voice_client.is_connected():
-        await ctx.send("Bot is not connected to voice channel")
+        # await ctx.send("Bot is not connected to voice channel")
         return
 
     voice_client.start_recording(
@@ -90,7 +92,9 @@ async def monitor(ctx):
         ctx.guild.name,
         False,
     )
-    await ctx.send(f"Start Monitoring")
+    await ctx.send(
+        f"Start Monitoring Voice Channel: {voice_client.channel.name}"
+    )
 
     for index in range(100):
         await asyncio.sleep(10)
@@ -111,7 +115,7 @@ async def monitor(ctx):
         await ctx.send(":stop_sign: Stopping record!")
         voice_client.stop_recording()
 
-    await ctx.send("Finished Monitoring")
+    await ctx.send(f"Finished Monitoring Voice Channel: {ctx.channel.name}")
 
 
 @bot.command()
@@ -161,35 +165,6 @@ async def messages_to_mood(ctx, *channel_names):
 
 
 @bot.command()
-async def youtube_songs(ctx):
-    return
-    text_channels = ctx.guild.text_channels
-    songs = await fetch_youtube_links_from_channel(
-        text_channels, ctx.guild.name
-    )
-    print(songs)
-
-
-@bot.command()
-async def youtube_to_cyanite_tags(
-    ctx,
-    text_channel: Optional[str] = None,
-    window_minutes: Optional[int] = None,
-):
-    return
-    text_channels = ctx.guild.text_channels
-    if text_channel:
-        text_channels = [tc for tc in text_channels if tc.name == text_channel]
-
-    genres, moods, spotify_ids = await youtube_to_genre_mood(
-        text_channels, window_minutes
-    )
-    await ctx.send(spotify_ids)
-    await ctx.send({"genres": genres, "moods": moods})
-    return genres, moods
-
-
-@bot.command()
 async def recommend(ctx, num_of_songs=2):
     guild = ctx.guild.name
 
@@ -228,9 +203,9 @@ async def recommend(ctx, num_of_songs=2):
         ]
     )
     spotify_ids = CyaniteApi().get_spotify_ids_by_keywords(keywords)
-
-    await ctx.channel.send("Sending keywords")
-    await ctx.channel.send(str(keywords))
+    await ctx.channel.send("Final keywords weights for recommendation:")
+    await ctx.channel.send(get_sorted_dict_str(keywords))
+    await ctx.channel.send("\nRecommended Spotify Tracks:")
 
     # print track links
     if spotify_ids:
@@ -254,9 +229,6 @@ async def input_genre_and_mood(ctx, arg1=None, arg2=None):
             f"""You can specify genre and mood: \n 
         genres: {UserInputGenres.to_list()}
         moods: {UserInputMoods.to_list()}
-        example with both genre and mood: /youtube_to_cyanite_tags_with_args ambient epic\n 
-        example with both genre : /youtube_to_cyanite_tags_with_args ambient -\n 
-        example with both mood: /youtube_to_cyanite_tags_with_args - epic
         """
         )
     elif not (arg1 and arg2):
@@ -264,11 +236,10 @@ async def input_genre_and_mood(ctx, arg1=None, arg2=None):
             f"""You can specify genre and mood: \n 
         genres: {UserInputGenres.to_list()}
         moods: {UserInputMoods.to_list()}
-        example with both genre and mood: /youtube_to_cyanite_tags_with_args ambient epic\n 
-        example with both genre : /youtube_to_cyanite_tags_with_args ambient -\n 
-        example with both mood: /youtube_to_cyanite_tags_with_args - epic
         """
         )
+    elif arg1 == "-" and arg2 == "-":
+        pass
     elif arg2 == "-":
         genre = arg1
         mood = None
@@ -280,4 +251,10 @@ async def input_genre_and_mood(ctx, arg1=None, arg2=None):
         mood = arg2
     message_db(ctx.guild).set_genre(genre)
     message_db(ctx.guild).set_mood(mood)
-    await ctx.send(f"Run bussines logic with genre:{genre}, mood:{mood}")
+    discord_message = f"Setting up user's seed:\n"
+    if genre:
+        discord_message += f"Genre: {genre}\t"
+    if mood:
+        discord_message += f"Mood: {mood}"
+
+    await ctx.send(discord_message)

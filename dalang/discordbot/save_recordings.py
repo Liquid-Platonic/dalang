@@ -94,9 +94,12 @@ async def find_mood_from_recordings(
     old_mood = old_dominant_mood.get("mood", None)
     new_mood = new_dominant_mood.get("mood", None)
     if old_mood != new_mood:
-        await channel.send(
-            f"Channel mood changed from `{old_mood}` to `{new_mood}`, write /recommend to vibe on your mood! 😎",
-        )
+        if not old_mood:
+            message = f"Voice Channel Mood detected as: `{new_mood}`!"
+        else:
+            message = f"Voice Channel Mood changed from: `{old_mood}` to: `{new_mood}`!"
+        await channel.send(message)
+
         mood_collector.add(payload, guild_name)
 
     if write_output:

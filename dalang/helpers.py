@@ -44,3 +44,11 @@ def merge_dicts(dicts: List[Dict]) -> Dict:
     for dict_ in dicts:
         merged_dict.update(dict_)
     return merged_dict
+
+
+def get_sorted_dict_str(d: Dict) -> str:
+    output_str = ""
+    for k, v in sorted(d.items(), key=lambda x: x[1], reverse=True):
+        output_str += f"{k}: {v:.2}\n"
+
+    return output_str
