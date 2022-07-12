@@ -24,6 +24,7 @@ audiofile = "^1.1.0"
 torch = "1.11.0"
 speechbrain = "^0.5.12"
 nltk = "^3.7"
+StrEnum = "^0.4.8"
 
 [tool.poetry.dev-dependencies]
 black = "^22.1.0"

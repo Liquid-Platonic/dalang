@@ -23,7 +23,7 @@ class AveragePredictionsAggregator(PredictionsAggregator):
         total_weights = 0
         sum_vector = defaultdict(float)
         for index, prediction in enumerate(predictions):
-            weight = 1000 - index * 10
+            weight = 1000 - index * 100
             if weight < 0:
                 weight = 0.0
             total_weights += weight
